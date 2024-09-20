@@ -2,7 +2,7 @@ export function submitForm(form) {
   form.onsubmit = async (e) => {
     e.preventDefault()
     try {
-      let response = await fetch("http://127.0.0.1:8000/api/products/", {
+      let response = await fetch("http://127.0.0.1:8000", {
         method: "POST",
         body: new FormData(form),
       })
