@@ -22,11 +22,11 @@ body {
   place-content: center;
   min-height: 100vh;
   font-size: 1.5rem;
-  background-color: #7700FF;
+  background-color: #273A64#7700FF;
 }
 
 .message {
-  background-color: #FF3900;
+  background-color: #7700FF;
   padding: 20px 2vw;
   min-width: min(20vw, 500px);
   gap: 2rem;
