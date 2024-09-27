@@ -7,11 +7,11 @@ document.querySelector('#app').innerHTML = `
   <div class="message">
   <h1>Регистрация обращения</h1>
   <form id="application_form">
-    <label for="surname">Фамилия:</label>
-    <input type="text" id="surname" name="surname" required>
+    <label for="last_name">Фамилия:</label>
+    <input type="text" id="last_name" name="last_name" required>
 
-    <label for="name">Имя:</label>
-    <input type="text" id="name" name="name" required>
+    <label for="first_name">Имя:</label>
+    <input type="text" id="first_name" name="first_name" required>
 
     <label for="patronymic">Отчество:</label>
     <input type="text" id="patronymic" name="patronymic" required>

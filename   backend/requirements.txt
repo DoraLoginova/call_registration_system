@@ -1,3 +1,0 @@
-Tornado
-pika
-psycopg2

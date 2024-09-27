@@ -1,7 +1,57 @@
-  rabbitmq:
-    image: astralinux/rabbitmq:latest
+version: '3.8'
+
+services:
+  frontend:
+    image: node:18                # Используем образ Node.js
+    working_dir: /usr/src/app     # Устанавливаем рабочую директорию
     volumes:
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./frontend:/usr/src/app    # Монтируем директорию frontend
+    command: >
+      sh -c "npm install && npm install -g vite && npm run build && npm install -g serve && serve -s dist"
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "3000:3000"               # Пробрасываем порт 3000 на хост
+    environment:
+      - NODE_ENV=production       # Устанавливаем переменную окружения, если необходимо
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"               # TCP порт для сообщений
+      - "15672:15672"             # HTTP порт для управления
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf # Кастомный конфиг
+      # - ./rabbitmq/enable_plugins.sh:/docker-entrypoint-initdb.d/enable_plugins.sh  # Скрипт для включения плагина
+    environment:
+      RABBITMQ_DEFAULT_USER: guest                # Имя пользователя по умолчанию
+      RABBITMQ_DEFAULT_PASS: guest            # Пароль пользователя по умолчанию
+  
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+    restart: always
+
+  servicedb:
+    build:
+      context: ./servicedb
+    depends_on:
+      - rabbitmq
+      - db
+    restart: always
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
+
+volumes:
+  db_data:
