@@ -2,29 +2,29 @@ version: '3.8'
 
 services:
   frontend:
-    image: node:18                # Используем образ Node.js
-    working_dir: /usr/src/app     # Устанавливаем рабочую директорию
+    image: node:18               
+    working_dir: /usr/src/app
     volumes:
-      - ./frontend:/usr/src/app    # Монтируем директорию frontend
+      - ./frontend:/usr/src/app   
     command: >
       sh -c "npm install && npm install -g vite && npm run build && npm install -g serve && serve -s dist"
     ports:
-      - "3000:3000"               # Пробрасываем порт 3000 на хост
+      - "3000:3000"  
     environment:
-      - NODE_ENV=production       # Устанавливаем переменную окружения, если необходимо
+      - NODE_ENV=production 
 
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"               # TCP порт для сообщений
-      - "15672:15672"             # HTTP порт для управления
+      - "5672:5672"  
+      - "15672:15672" 
     volumes:
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf # Кастомный конфиг
-      # - ./rabbitmq/enable_plugins.sh:/docker-entrypoint-initdb.d/enable_plugins.sh  # Скрипт для включения плагина
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf 
+      # - ./rabbitmq/enable_plugins.sh:/docker-entrypoint-initdb.d/enable_plugins.sh 
     environment:
-      RABBITMQ_DEFAULT_USER: guest                # Имя пользователя по умолчанию
-      RABBITMQ_DEFAULT_PASS: guest            # Пароль пользователя по умолчанию
+      RABBITMQ_DEFAULT_USER: guest  
+      RABBITMQ_DEFAULT_PASS: guest  
   
   backend:
     build:
