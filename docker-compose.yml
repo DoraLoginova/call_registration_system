@@ -11,40 +11,43 @@ services:
     ports:
       - "3000:3000"  
     environment:
-      - NODE_ENV=production 
+      - NODE_ENV=production
 
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"  
-      - "15672:15672" 
-    volumes:
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf 
-      # - ./rabbitmq/enable_plugins.sh:/docker-entrypoint-initdb.d/enable_plugins.sh 
-    environment:
-      RABBITMQ_DEFAULT_USER: guest  
-      RABBITMQ_DEFAULT_PASS: guest  
-  
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:
       - rabbitmq
-    restart: always
+
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    ports:
+      - "5672:5672"          
+      - "15672:15672"       
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/enable_plugins.sh:/docker-entrypoint-initdb.d/enable_plugins.sh 
 
   servicedb:
     build:
       context: ./servicedb
+      dockerfile: Dockerfile
     depends_on:
       - rabbitmq
       - db
-    restart: always
 
   db:
-    image: postgres:latest
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: user
@@ -52,6 +55,16 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./db/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
-
+  
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: dora@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: 1234qwer/.,M
+  #   ports:
+  #     - "5050:80" 
+  #   depends_on:
+  #     - db 
+  #   restart: always
 volumes:
   db_data:
