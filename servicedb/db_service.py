@@ -1,16 +1,27 @@
 import time
 import pika
 import psycopg2
+import psycopg2.pool
 import json
 
+# Пул соединений для PostgreSQL
+db_pool = None
 
-def connect_to_db():
-    return psycopg2.connect(
+
+def init_db_pool(minconn, maxconn):
+    global db_pool
+    db_pool = psycopg2.pool.SimpleConnectionPool(
+        minconn,
+        maxconn,
         dbname='mydb',
         user='user',
         password='password',
         host='db'
     )
+
+
+def connect_to_db():
+    return db_pool.getconn()
 
 
 def insert_appeal(data):
@@ -30,7 +41,7 @@ def insert_appeal(data):
             ))
             conn.commit()
     finally:
-        conn.close()
+        db_pool.putconn(conn)
 
 
 def callback(ch, method, properties, body):
@@ -39,7 +50,7 @@ def callback(ch, method, properties, body):
 
 
 def setup_rabbitmq():
-    for _ in range(5):  # Пытаться 5 раз
+    for _ in range(5):
         try:
             connection = pika.BlockingConnection(
                 pika.ConnectionParameters(
@@ -59,6 +70,7 @@ def setup_rabbitmq():
 
 
 if __name__ == "__main__":
+    init_db_pool(minconn=1, maxconn=30)
     channel = setup_rabbitmq()
     channel.basic_consume(
         queue='appeals',
