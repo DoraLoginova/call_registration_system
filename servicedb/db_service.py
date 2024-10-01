@@ -4,6 +4,9 @@ import psycopg2
 import psycopg2.pool
 import json
 
+from .constants import MIN_CONNECT, MAX_CONNECT
+
+
 # Пул соединений для PostgreSQL
 db_pool = None
 
@@ -70,7 +73,7 @@ def setup_rabbitmq():
 
 
 if __name__ == "__main__":
-    init_db_pool(minconn=1, maxconn=30)
+    init_db_pool(minconn=MIN_CONNECT, maxconn=MAX_CONNECT)
     channel = setup_rabbitmq()
     channel.basic_consume(
         queue='appeals',
