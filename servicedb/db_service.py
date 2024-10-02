@@ -49,6 +49,28 @@ async def insert_appeal(data):
         db_pool.putconn(conn)
 
 
+async def get_appeals():
+    """Асинхронная функция получения всех обращений."""
+    conn = await connect_to_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM appeals;")
+            records = cur.fetchall()
+            appeals = []
+            for record in records:
+                appeals.append({
+                    'id': record[0],
+                    'last_name': record[1],
+                    'first_name': record[2],
+                    'patronymic': record[3],
+                    'phone': record[4],
+                    'message': record[5]
+                })
+            return appeals
+    finally:
+        db_pool.putconn(conn)
+
+
 async def message_handler(message: aio_pika.IncomingMessage):
     """Функция асинхронной обработки входящих сообщений из очереди RabbitMQ"""
     async with message.process():
@@ -60,7 +82,7 @@ async def setup_rabbitmq():
     """Асинхрон. подключ. к серверу RabbitMQ с данными (user/password/host)."""
     connection = await aio_pika.connect_robust(
         "amqp://guest:guest@rabbitmq/"
-    )  
+    )
     async with connection:
         channel = await connection.channel()
         await channel.set_queue('appeals')
