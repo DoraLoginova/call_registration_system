@@ -1,17 +1,17 @@
-import time
-import pika
+import asyncio
+import aio_pika
 import psycopg2
 import psycopg2.pool
 import json
 
 from .constants import MIN_CONNECT, MAX_CONNECT
 
-
 # Пул соединений для PostgreSQL
 db_pool = None
 
 
 def init_db_pool(minconn, maxconn):
+    """Функция инициализации пула соединений."""
     global db_pool
     db_pool = psycopg2.pool.SimpleConnectionPool(
         minconn,
@@ -23,12 +23,14 @@ def init_db_pool(minconn, maxconn):
     )
 
 
-def connect_to_db():
+async def connect_to_db():
+    """Асинхронная функция получения соединения из пула."""
     return db_pool.getconn()
 
 
-def insert_appeal(data):
-    conn = connect_to_db()
+async def insert_appeal(data):
+    """Асинхронная функция вставки обращения."""
+    conn = await connect_to_db()
     try:
         with conn.cursor() as cur:
             cur.execute("""
@@ -47,39 +49,29 @@ def insert_appeal(data):
         db_pool.putconn(conn)
 
 
-def callback(ch, method, properties, body):
-    data = json.loads(body)
-    insert_appeal(data)
+async def message_handler(message: aio_pika.IncomingMessage):
+    """Функция асинхронной обработки входящих сообщений из очереди RabbitMQ"""
+    async with message.process():
+        data = json.loads(message.body)
+        await insert_appeal(data)
 
 
-def setup_rabbitmq():
-    for _ in range(5):
-        try:
-            connection = pika.BlockingConnection(
-                pika.ConnectionParameters(
-                    host='rabbitmq',
-                    credentials=pika.PlainCredentials('guest', 'guest')
-                )
-            )
-            channel = connection.channel()
-            channel.queue_declare(queue='appeals')
-            return channel
-        except pika.exceptions.AMQPConnectionError as e:
-            print(f"Ошибка подключения к RabbitMQ: {e}")
-            time.sleep(2)
+async def setup_rabbitmq():
+    """Асинхрон. подключ. к серверу RabbitMQ с данными (user/password/host)."""
+    connection = await aio_pika.connect_robust(
+        "amqp://guest:guest@rabbitmq/"
+    )  
+    async with connection:
+        channel = await connection.channel()
+        await channel.set_queue('appeals')
+        await channel.consume(message_handler, queue='appeals')
+        print('Ожидание сообщений. Для выхода нажмите CTRL+C')
+        return connection
 
-    print("Не удалось подключиться к RabbitMQ после нескольких попыток.")
-    exit(1)
 
+async def main():
+    init_db_pool(minconn=MIN_CONNECT, maxconn=MAX_CONNECT)
+    await setup_rabbitmq()
 
 if __name__ == "__main__":
-    init_db_pool(minconn=MIN_CONNECT, maxconn=MAX_CONNECT)
-    channel = setup_rabbitmq()
-    channel.basic_consume(
-        queue='appeals',
-        on_message_callback=callback,
-        auto_ack=True
-    )
-
-    print('Ожидание сообщений. Для выхода нажмите CTRL+C')
-    channel.start_consuming()
+    asyncio.run(main())
