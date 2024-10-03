@@ -95,7 +95,7 @@ async def wait_for_rabbitmq():
                 "amqp://guest:guest@rabbitmq/"
             )
             await connection.close()
-            print("RabbitMQ is available")
+            print("RabbitMQ доступен")
             return
         except Exception as e:
             print(f"Не удалось подключиться к RabbitMQ: {e}")
