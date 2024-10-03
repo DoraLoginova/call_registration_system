@@ -14,13 +14,18 @@ services:
       - NODE_ENV=production
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: python:latest  # Используем базовое изображение Python
+    working_dir: /app
+    volumes:
+      - ./backend:/app  # Копируем контент из папки backend
+      - ./servicedb:/app/servicedb  # Копируем контент из servicedb
     ports:
       - "8000:8000"
     depends_on:
+      - servicedb
       - rabbitmq
+    command: >
+      sh -c "pip install --no-cache-dir -r requirements.txt && python -m apps"
 
   rabbitmq:
     build:
@@ -43,6 +48,13 @@ services:
     depends_on:
       - rabbitmq
       - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
 
   db:
     build:
@@ -55,7 +67,12 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./db/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
-  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
   # pgadmin:
   #   image: dpage/pgadmin4
   #   environment:

@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "db_service.py"]
+CMD ["python","-m", "db_service"]

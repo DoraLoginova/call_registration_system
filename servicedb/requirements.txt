@@ -1,4 +1,5 @@
 pika
 psycopg2-binary
-psycopg2_pool
-aio_pika
+psycopg2-pool
+aio-pika
+aiopg

@@ -1,15 +1,18 @@
 import tornado.ioloop
 import tornado.web
 import json
-import asyncio
-
-from servicedb.db_service import insert_appeal, get_appeals
+from servicedb.db_service import (
+    init_db_pool,
+    insert_appeal,
+    get_appeals,
+    setup_rabbitmq,
+    wait_for_db,
+    wait_for_rabbitmq,
+)
 
 
 class MainHandler(tornado.web.RequestHandler):
-
     async def options(self):
-        print("Получен OPTIONS запрос.")
         self.set_status(204)
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Methods", "POST, OPTIONS, GET")
@@ -21,7 +24,6 @@ class MainHandler(tornado.web.RequestHandler):
         try:
             data = json.loads(self.request.body)
             await insert_appeal(data)
-
             self.set_status(201)
             self.finish("Обращение получено.")
         except json.JSONDecodeError:
@@ -35,7 +37,6 @@ class MainHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         try:
             appeals_list = await get_appeals()
-
             self.set_status(200)
             self.finish(json.dumps(appeals_list, ensure_ascii=False))
         except Exception as e:
@@ -49,6 +50,15 @@ def make_app():
     ])
 
 
+async def init_app():
+    await wait_for_db()
+    await init_db_pool(minconn=1, maxconn=20)
+    await wait_for_rabbitmq()
+    await setup_rabbitmq()
+
+
 if __name__ == "__main__":
-    asyncio.run(make_app().listen(8000))
+    app = make_app()
+    app.listen(8000)
+    tornado.ioloop.IOLoop.current().add_callback(init_app)
     tornado.ioloop.IOLoop.current().start()
