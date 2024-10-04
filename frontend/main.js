@@ -1,31 +1,18 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { submitForm } from './script.js'
+const submitForm  = async () => {
+const form = document.getElementById('application_form')
 
-document.querySelector('#app').innerHTML = `
-  <div class="message">
-  <h1>Регистрация обращения</h1>
-  <form id="application_form">
-    <label for="last_name">Фамилия:</label>
-    <input type="text" id="last_name" name="last_name" required>
+  const formData = new FormData(form)
+  const fetchParams = JSON.stringify(Object.fromEntries(formData));
+  form.onsubmit = async (e) => {
+    e.preventDefault()
+    try {
+      let response = await fetch("http://localhost:8000/api/appeal", {
+        method: "POST",
+        body: fetchParams,
+      })
 
-    <label for="first_name">Имя:</label>
-    <input type="text" id="first_name" name="first_name" required>
-
-    <label for="patronymic">Отчество:</label>
-    <input type="text" id="patronymic" name="patronymic" required>
-
-    <label for="phone">Телефон:</label>
-    <input type="tel" id="phone" name="phone" required>
-
-    <label for="message">Обращение:</label>
-    <textarea id="message" name="message" required></textarea>
-
-    <button type="submit">Отправить</button>
-  </form>
-  </div>
-`
-
-submitForm(document.querySelector('#application_form'))
-
+    } catch (e) {
+      alert("Ошибка", e)
+    }
+  }
+}

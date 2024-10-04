@@ -2,38 +2,31 @@ version: '3.8'
 
 services:
   frontend:
-    image: node:18               
-    working_dir: /usr/src/app
+    image: nginx:alpine               
     volumes:
-      - ./frontend:/usr/src/app   
-    command: >
-      sh -c "npm install && npm install -g vite && npm run build && npm install -g serve && serve -s dist"
+      - ./frontend:/usr/share/nginx/html   
     ports:
-      - "3000:3000"  
-    environment:
-      - NODE_ENV=production
+      - "3000:80" 
 
   backend:
-    image: python:latest  # Используем базовое изображение Python
-    working_dir: /app
-    volumes:
-      - ./backend:/app  # Копируем контент из папки backend
-      - ./servicedb:/app/servicedb  # Копируем контент из servicedb
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    volumes:
+      - ./servicedb:/app/servicedb
     depends_on:
       - servicedb
       - rabbitmq
-    command: >
-      sh -c "pip install --no-cache-dir -r requirements.txt && python -m apps"
 
   rabbitmq:
     build:
       context: ./rabbitmq
       dockerfile: Dockerfile
     ports:
-      - "5672:5672"          
-      - "15672:15672"       
+      - "5672:5672"      # порт RabbitMQ  
+      - "15672:15672"    # порт для управления 
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -54,8 +47,6 @@ services:
       timeout: 5s
       retries: 5
 
-
-
   db:
     build:
       context: ./db
@@ -72,7 +63,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      
+
   # pgadmin:
   #   image: dpage/pgadmin4
   #   environment:
