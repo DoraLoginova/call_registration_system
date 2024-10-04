@@ -23,4 +23,3 @@ const submitForm = async () => {
 };
 
 submitForm();
-
