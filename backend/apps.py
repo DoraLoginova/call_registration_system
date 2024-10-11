@@ -1,3 +1,4 @@
+import asyncio
 import tornado.ioloop
 import tornado.web
 import json
@@ -7,7 +8,6 @@ from servicedb.db_service import (
     get_appeals,
     setup_rabbitmq,
     wait_for_db,
-    wait_for_rabbitmq,
 )
 
 
@@ -51,11 +51,11 @@ def make_app():
 
 
 async def init_app():
-    await wait_for_db()
-    await init_db_pool(minconn=1, maxconn=20)
-    await wait_for_rabbitmq()
-    await setup_rabbitmq()
-
+    await asyncio.gather(
+        wait_for_db(),
+        init_db_pool(minconn=5, maxconn=100),
+        setup_rabbitmq(),
+    )
 
 if __name__ == "__main__":
     app = make_app()
