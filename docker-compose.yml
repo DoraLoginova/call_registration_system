@@ -16,7 +16,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     expose:
-      - "8000"  # Изменим с ports на expose
+      - "8000" 
     volumes:
       - ./servicedb:/app/servicedb
     depends_on:

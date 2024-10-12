@@ -77,14 +77,21 @@ async def message_handler(message: aio_pika.IncomingMessage):
 
 
 async def setup_rabbitmq():
-    connection = await aio_pika.connect_robust("amqp://guest:guest@rabbitmq/")
-    print("Успешное подключение к RabbitMQ!")
-    async with connection:
-        channel = await connection.channel()
-        await channel.set_qos(prefetch_count=10)  # Оптимизация обработки сообщений
-        queue = await channel.declare_queue('appeals')
-        await queue.consume(message_handler)
-        print('Ожидание сообщений. Для выхода нажмите CTRL+C')
+    for _ in range(5):  # Попробуйте несколько раз
+        try:
+            connection = await aio_pika.connect_robust("amqp://guest:guest@rabbitmq/")
+            print("Успешное подключение к RabbitMQ!")
+            async with connection:
+                channel = await connection.channel()
+                await channel.set_qos(prefetch_count=10)
+                queue = await channel.declare_queue('appeals')
+                await queue.consume(message_handler)
+                print('Ожидание сообщений. Для выхода нажмите CTRL+C')
+            return  # Успешное подключение
+        except Exception as e:
+            print(f"Ошибка подключения к RabbitMQ: {e}")
+            await asyncio.sleep(2)  # Ждем перед новой попыткой
+
 
 
 async def wait_for_db():

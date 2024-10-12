@@ -7,7 +7,7 @@ const submitForm = async () => {
     const formData = new FormData(form);
 
     try {
-      let response = await fetch("http://localhost:3000/api", {
+      let response = await fetch("http://localhost:3000/api/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
