@@ -4,16 +4,19 @@ services:
   frontend:
     image: nginx:alpine               
     volumes:
-      - ./frontend:/usr/share/nginx/html   
+      - ./frontend:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf # конфиг для nginx
     ports:
       - "3000:80" 
+    depends_on:
+      - backend   
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"  # Изменим с ports на expose
     volumes:
       - ./servicedb:/app/servicedb
     depends_on:
