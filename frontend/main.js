@@ -15,6 +15,10 @@ const submitForm = async () => {
         body: JSON.stringify(Object.fromEntries(formData))
       });
 
+      if(response.ok) {
+        form.reset();
+      }
+
       
     } catch (e) {
       alert("Ошибка: " + e.message);
