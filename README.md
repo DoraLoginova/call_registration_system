@@ -113,7 +113,7 @@ curl -X POST http://localhost:8000/api/appeal \
 
 ```
 |                   Веб-клиент                     |
-|  http://localhost:3000/api/                     |
+|  http://localhost:3000/                    |
 |               ↑                                   |
 |               |                                   |
 |          ┌────┴────┐                              |
