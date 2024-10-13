@@ -27,7 +27,7 @@ git clone git@github.com:DoraLoginova/call_registration_system.git
 docker-compose up --build
 
 ```
-Это создаст и запустит все сервисы. Frontend будет доступен на http://localhost:3000, а Backend на http://localhost:8000/api/appeal
+Это создаст и запустит все сервисы на http://localhost:3000
 
 Структура проекта:
   frontend/ — папка с фронтендом.
@@ -60,7 +60,7 @@ PASSWORD: guest
 
 Просмотр обращений:
 
-Данные обращения могут быть получены через GET-запрос по адресу http://localhost:8000/api/appeal.
+Данные обращения могут быть получены через GET-запрос по адресу http://localhost:3000/api/.
 
 ###PgAdmin (опционально)
 
@@ -73,12 +73,12 @@ PASSWORD: guest
 Пример запроса для получения всех обращений:
 
 ```
-curl -X GET http://localhost:8000/api/appeal
+curl -X GET http://localhost:3000/api/
 
 ```
 
 ```
-curl -X POST http://localhost:8000/api/appeal \
+curl -X POST http://localhost:3000/api/ \
 -H "Content-Type: application/json" \
 -d '{
   "last_name": "Иванов",
