@@ -91,9 +91,11 @@ curl -X POST http://localhost:8000/api/appeal \
 ```
 
 1. Запуск Docker Compose
-   └── docker-compose up
-        ↓
+```
+  docker-compose up
+```
 2. Запуск контейнеров (services)
+```
    ├── frontend (nginx)
    │   └── Порт 3000 (HTTP)
    │       └── Обрабатывает запросы на http://localhost:3000/
@@ -106,9 +108,10 @@ curl -X POST http://localhost:8000/api/appeal \
    └── db (PostgreSQL)
        └── Порт 5432 (PostgreSQL)
            └── Обрабатывает запросы к базе данных
-
+```
 3. Обработка запросов:
--------------------------------------------------
+
+```
 |                   Веб-клиент                     |
 |  http://localhost:3000/api/                     |
 |               ↑                                   |
@@ -141,4 +144,5 @@ curl -X POST http://localhost:8000/api/appeal \
 |         |  db      |                              |
 |         |(PostgreSQL)|                            |
 |         └───────────┘                              |
--------------------------------------------------
+
+```
