@@ -1,4 +1,4 @@
-import os
+# import os
 import asyncio
 import tornado.ioloop
 import tornado.web
@@ -53,7 +53,8 @@ class IndexHandler(tornado.web.RequestHandler):
 
 
 def make_app():
-    # frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../frontend'))
+    # frontend_path = os.path.abspath(
+    # os.path.join(os.path.dirname(__file__), '../frontend'))
     # static_path = os.path.join(os.path.dirname(__file__), '.')
     return tornado.web.Application([
         (r"/api/", MainHandler),
