@@ -12,11 +12,11 @@ class UserBehavior(TaskSet):
             "phone": "1234567890",
             "message": "Тестовое обращение"
         }
-        self.client.post("/api/appeal", json=appeal_data)
+        self.client.post("/api/", json=appeal_data)
 
     @task(2)
     def get_appeals(self):
-        self.client.get("/api/appeal")
+        self.client.get("/api/")
 
 
 class WebsiteUser(HttpUser):

@@ -37,7 +37,13 @@ async def insert_appeal(data):
     try:
         async with conn.cursor() as cur:
             await cur.execute("""
-                INSERT INTO appeals (last_name, first_name, patronymic, phone, message)
+                INSERT INTO appeals (
+                    last_name,
+                    first_name,
+                    patronymic,
+                    phone,
+                    message
+                )
                 VALUES (%s, %s, %s, %s, %s)
             """, (
                 data['last_name'],
@@ -77,9 +83,11 @@ async def message_handler(message: aio_pika.IncomingMessage):
 
 
 async def setup_rabbitmq():
-    for _ in range(5):  # Попробуйте несколько раз
+    for _ in range(5):
         try:
-            connection = await aio_pika.connect_robust("amqp://guest:guest@rabbitmq/")
+            connection = await aio_pika.connect_robust(
+                "amqp://guest:guest@rabbitmq/"
+            )
             print("Успешное подключение к RabbitMQ!")
             async with connection:
                 channel = await connection.channel()
@@ -87,11 +95,10 @@ async def setup_rabbitmq():
                 queue = await channel.declare_queue('appeals')
                 await queue.consume(message_handler)
                 print('Ожидание сообщений. Для выхода нажмите CTRL+C')
-            return  # Успешное подключение
+            return
         except Exception as e:
             print(f"Ошибка подключения к RabbitMQ: {e}")
             await asyncio.sleep(2)  # Ждем перед новой попыткой
-
 
 
 async def wait_for_db():

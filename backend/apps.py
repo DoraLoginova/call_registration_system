@@ -1,3 +1,4 @@
+import os
 import asyncio
 import tornado.ioloop
 import tornado.web
@@ -44,10 +45,22 @@ class MainHandler(tornado.web.RequestHandler):
             self.finish(f"Ошибка: {str(e)}")
 
 
+class IndexHandler(tornado.web.RequestHandler):
+    def get(self):
+        print("IndexHandler был вызван!")
+        self.set_header("Content-Type", "text/html")
+        self.render("index.html")
+
+
 def make_app():
+    # frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../frontend'))
+    # static_path = os.path.join(os.path.dirname(__file__), '.')
     return tornado.web.Application([
         (r"/api/", MainHandler),
+        (r"/", IndexHandler),
     ])
+    # template_path=frontend_path
+    # static_path=static_path
 
 
 async def init_app():
